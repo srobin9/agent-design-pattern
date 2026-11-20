@@ -79,7 +79,7 @@ Antigravity의 로컬 설정(`~/.gemini/config/`)은 로그인된 Google 계정�
 1. **새 노트북에서 클론 받기**
    - *다른 노트북이 다른 GitHub 계정을 쓰는 경우*: GitHub 저장소의 `Settings → Collaborators`에서 서브 계정을 초대하거나, 읽기 권한(`Contents: Read-only`)만 부여한 Fine-grained Personal Access Token(PAT)을 사용하세요.
    ```bash
-   git clone https://github.com/<내-계정>/agent-design-pattern.git
+   git clone https://github.com/srobin9/agent-design-pattern.git
    cd agent-design-pattern
    ```
 2. **원클릭 글로벌 설치 실행**
