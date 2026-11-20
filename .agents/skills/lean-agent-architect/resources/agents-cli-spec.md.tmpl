@@ -1,0 +1,36 @@
+# Agent Spec (1-Page 아키텍처 계약서)
+
+> **작성 가이드 (사용자용)**: 최신 Python/ADK 문법은 몰라도 됩니다. 아래 **1~4번 항목만 평소 아키텍처/운영 문서처럼 짧게** 적어주시면, Antigravity가 **5~6번(ADK 패턴 매핑 및 구현 슬라이스)**을 자동으로 채우고 모호한 부분만 질문합니다.
+
+## 1. 해결할 문제 & 역할 경계 (Scope & Non-Goals)
+- **핵심 목적 (한 줄)**: <!-- 예: Cloud Run 서비스 장애 알람 발생 시 최근 로그·배포 이력을 비교해 초기 원인 후보 3가지를 요약한다 -->
+- **명확한 제외 범위 (Non-Goals)**: <!-- 예: 직접 롤백이나 설정 변경(Write 작업)은 절대 수행하지 않음, 대시보드 UI는 만들지 않음 -->
+
+## 2. 입출력 계약 (Input / Output DTO)
+- **입력 (Trigger / Input)**: <!-- 예: 서비스명(str), 리전(str), 조회 시간 범위(분, 기본 30분) -->
+- **기대 출력 (Output 구조)**: <!-- 예: 1) 장애 요약, 2) 주요 에러 패턴 Top 3, 3) 최근 변경점 연관성(상/중/하), 4) 권장 확인 명령어 -->
+
+## 3. 외부 연동 도구 & 데이터 소스 (Tools Required)
+| 도구/기능명 | 역할 (읽기/쓰기 구분) | 연동 대상 (GCP/API/DB) | 인증 및 타임아웃 조건 |
+| :--- | :--- | :--- | :--- |
+| <!-- 예: fetch_error_logs --> | <!-- 읽기 전용 (Read) --> | <!-- Cloud Logging --> | <!-- ADC 기본 인증, 최대 100건 제한 --> |
+
+## 4. SRE 가드레일 & 제약 조건 (Constraints & Safety Rules)
+- **금지 동작 (Hard Block)**: <!-- 예: delete/update/deploy 계열 명령 차단, 조회 기간 24시간 초과 입력 거부 -->
+- **실패 처리 (Fallback)**: <!-- 예: 특정 API 권한 오류(403) 시 전체 중단하지 않고 해당 항목만 '권한 없음'으로 표기 후 나머지 결과 반환 -->
+- **성공 기준 (SLO / Success Criteria)**: <!-- 예: 필수 3개 도구 호출 누락 0건, 응답 내 근거 로그 타임스탬프 포함 -->
+
+---
+<!-- 아래 5~6번 섹션은 비워두셔도 됩니다. Antigravity(lean-agent-architect 스킬)가 자동 설계 후 승인을 요청합니다. -->
+
+## 5. ADK 아키텍처 패턴 매핑 (AI 자동 작성 → 아키텍트 승인)
+- **선택 패턴**: <!-- Single Agent / SequentialAgent / ParallelAgent + Merger / LoopAgent 중 택 1 및 선정 이유 -->
+- **상태(State) 흐름**: <!-- session.state 키 설계 (예: logs_summary, deploy_diff) -->
+- **가드레일 콜백**: <!-- before_tool_callback 등 적용 지점 -->
+- **Reference Samples (서브에이전트 격리 조회용, 최대 1~2개)**:
+  - <!-- 필요 시에만 기재: core/python/<recipe> -->
+
+## 6. Thin-Slice 구현 계획 (한 번에 한 슬라이스씩 진행)
+- [ ] **Slice 1 (구조 & Mock 계약)**: `agents-cli scaffold` + ADK 에이전트 토폴로지 + Mock/Stub 도구(`USE_MOCK_TOOLS=true`) + 계약 `pytest` + 로컬 스모크(`agents-cli run`)
+- [ ] **Slice 2 (실제 GCP/API 연동 & SRE 콜백)**: 실제 클라이언트 연결 + `before_tool_callback` 가드레일 테스트 + 예외 처리
+- [ ] **Slice 3 (품질 평가 & 배포 준비)**: 핵심 시나리오 2건 `agents-cli eval run` 통과 + 배포 타깃(`Cloud Run` / `Agent Runtime`) 설정
